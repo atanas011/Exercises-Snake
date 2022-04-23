@@ -12,7 +12,8 @@ public class GamePanel extends JPanel implements ActionListener {
 	static final int SCREEN_HEIGHT = 500;
 	static final int UNIT_SIZE = 25;
 	static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
-	static final int DELAY = 150; // game pace
+//	static final int DELAY = 150; // game pace
+	int delay = 300;
 	// snake body parts' coords
 	final int x[] = new int[GAME_UNITS];
 	final int y[] = new int[GAME_UNITS];
@@ -37,7 +38,7 @@ public class GamePanel extends JPanel implements ActionListener {
 	public void startGame() {
 		newApple();
 		running = true;
-		timer = new Timer(DELAY, this); // "this" because we are using ActionListener IF
+		timer = new Timer(delay, this); // "this" because we are using ActionListener IF
 		timer.start();
 	}
 
@@ -64,14 +65,17 @@ public class GamePanel extends JPanel implements ActionListener {
 					g.setColor(Color.green);
 					g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
 				} else { // body
-//					g.setColor(new Color(45, 180, 0));
-					g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+					g.setColor(new Color(45, 180, 0));
+//					g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
 					g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
 				}
+
+			// score
 			g.setColor(Color.red);
 			g.setFont(new Font("Ink Free", Font.BOLD, 30));
 			FontMetrics metrics = getFontMetrics(g.getFont());
-			g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2,
+			g.drawString("Score: " + applesEaten,
+					(SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2,
 					g.getFont().getSize());
 		} else
 			gameOver(g);
@@ -90,16 +94,16 @@ public class GamePanel extends JPanel implements ActionListener {
 
 		switch (direction) {
 		case 'U':
-			y[0] = y[0] - UNIT_SIZE;
+			y[0] -= UNIT_SIZE;
 			break;
 		case 'D':
-			y[0] = y[0] + UNIT_SIZE;
+			y[0] += UNIT_SIZE;
 			break;
 		case 'L':
-			x[0] = x[0] - UNIT_SIZE;
+			x[0] -= UNIT_SIZE;
 			break;
 		case 'R':
-			x[0] = x[0] + UNIT_SIZE;
+			x[0] += UNIT_SIZE;
 			break;
 		}
 	}
@@ -108,6 +112,7 @@ public class GamePanel extends JPanel implements ActionListener {
 		if (x[0] == appleX && y[0] == appleY) {
 			bodyParts++;
 			applesEaten++;
+			timer.setDelay(delay -= 10); // increases game pace
 			newApple();
 		}
 	}
@@ -117,17 +122,8 @@ public class GamePanel extends JPanel implements ActionListener {
 		for (int i = bodyParts; i > 0; i--)
 			if (x[0] == x[i] && y[0] == y[i])
 				running = false;
-		// head with left border
-		if (x[0] < 0)
-			running = false;
-		// head with right border
-		if (x[0] > SCREEN_WIDTH)
-			running = false;
-		// head with top border
-		if (y[0] < 0)
-			running = false;
-		// head with bottom border
-		if (y[0] > SCREEN_HEIGHT)
+		// head with left, right, top, bottom border
+		if (x[0] < 0 || x[0] >= SCREEN_WIDTH || y[0] < 0 || y[0] >= SCREEN_HEIGHT)
 			running = false;
 		if (!running)
 			timer.stop();
